@@ -1,0 +1,44 @@
+name: scoutlink
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-scoutlink}
+      POSTGRES_USER: ${POSTGRES_USER:-scoutlink}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-scoutlink}
+    ports: ["5432:5432"]
+    volumes: ["scoutlink_postgres:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: infra/backend.Dockerfile
+    environment:
+      SCOUTLINK_ENVIRONMENT: local
+      SCOUTLINK_DATABASE_URL: postgresql+psycopg://scoutlink:scoutlink@db:5432/scoutlink
+      SCOUTLINK_CORS_ORIGINS: '["http://localhost:3000","http://localhost:8080"]'
+    ports: ["8000:8000"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: infra/backend.Dockerfile
+    command: ["scoutlink-worker"]
+    environment:
+      SCOUTLINK_ENVIRONMENT: local
+      SCOUTLINK_DATABASE_URL: postgresql+psycopg://scoutlink:scoutlink@db:5432/scoutlink
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  scoutlink_postgres:
