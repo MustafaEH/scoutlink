@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scoutlink_product/core/config/app_config.dart';
 import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
 import 'package:scoutlink_product/features/auth/application/identity_providers.dart';
+import 'package:scoutlink_product/features/auth/application/sign_out_service.dart';
 import 'package:scoutlink_product/features/auth/data/identity_repository.dart';
 import 'package:scoutlink_product/features/home/presentation/home_screen.dart';
 import 'package:scoutlink_product/features/home/presentation/verified_placeholder_screen.dart';
 import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
-import 'package:scoutlink_product/features/onboarding/data/onboarding_draft_store.dart';
 import 'package:scoutlink_product/features/onboarding/data/profile_media_repository.dart';
 import 'package:scoutlink_product/features/onboarding/presentation/onboarding_flow.dart';
 
@@ -69,9 +69,9 @@ class _IdentityGate extends ConsumerWidget {
                   : 'We could not load your ScoutLink account.',
               onRetry: () => ref.invalidate(identityProvider),
               onStartOver: () async {
-                await ref.read(onboardingDraftStoreProvider).clear();
+                await ref.read(signOutServiceProvider).signOut();
                 ref.invalidate(onboardingControllerProvider);
-                await ref.read(authRepositoryProvider).signOut();
+                ref.invalidate(identityProvider);
               },
             );
           },

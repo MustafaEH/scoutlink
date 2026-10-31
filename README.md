@@ -64,6 +64,8 @@ Key documents:
 ## Current foundation
 
 - Responsive role-aware Flutter shell with custom ScoutLink theme.
+- Persistent Supabase magic-link authentication with account-safe logout.
+- Encrypted Player/Scout onboarding drafts and a temporary verified-user placeholder.
 - FastAPI application with versioned routing and health endpoints.
 - Async SQLAlchemy/PostgreSQL configuration and Alembic foundation.
 - Background worker entry point.
@@ -95,12 +97,19 @@ Android emulator, use `10.0.2.2` to reach the API running on the host machine:
 flutter run `
   --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 `
   --dart-define=SUPABASE_URL=https://hcdbpescehokdvendcxs.supabase.co `
-  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY `
+  --dart-define=AUTH_REDIRECT_URL=com.scoutlink.app://login-callback/
 ```
 
 Magic links return to `com.scoutlink.app://login-callback/`. Configure
 `SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API.
 Secret/service-role keys must never be included in Flutter builds.
+
+Supabase restores the signed-in session when the app restarts. Logout revokes
+the session and clears device-only onboarding data so multiple test accounts do
+not share local profile details. Until the deployed identity API is ready,
+verified users see the temporary placeholder; enable the real completion path
+with `--dart-define=IDENTITY_API_ENABLED=true` only in a connected environment.
 
 Product tables live in the private `app` PostgreSQL schema. In the Supabase
 Table Editor, change the schema selector from `public` to `app` to inspect
