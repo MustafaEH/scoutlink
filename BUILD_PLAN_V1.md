@@ -2,14 +2,14 @@
 
 Status: Authoritative delivery timeline  
 Team: one full-time developer plus one football/business founder  
-Outcome: private pilot-ready PWA with all v1.0 P0 features complete
+Outcome: private pilot-ready Flutter mobile app with all v1.0 P0 features complete
 
 ## 1. Delivery strategy
 
 The timeline is achievable only under these rules:
 
 1. Scope in `MVP_PRODUCT_SPEC_V1.md` is frozen for the 12-week cycle.
-2. One responsive PWA; no native apps.
+2. One Flutter mobile app for player, guardian, recruiter, academy, and assigned staff roles; Android pilot first, iOS afterward.
 3. Managed PostgreSQL/Auth/Storage and managed video.
 4. Manual verification and operations before automation.
 5. Structured meeting workflow; no general chat.
@@ -80,7 +80,7 @@ Engineering:
 - FastAPI/Pydantic v2 modular-monolith skeleton with versioned OpenAPI endpoints.
 - SQLAlchemy 2, Alembic, PostgreSQL/Supabase staging setup, and migration pipeline.
 - Dockerized API and worker foundations; static HTML/CSS marketing-site skeleton.
-- CI: formatting, analysis, tests, migrations, Flutter web build, and Docker build.
+- CI: formatting, analysis, tests, migrations, Android build, and Docker build.
 - Environment validation and secrets rules.
 - Architecture decision records.
 
@@ -170,7 +170,7 @@ Exit:
 
 - Feed candidate/visibility query.
 - Transparent scoring and exploration allocation.
-- Mobile vertical feed and desktop layout.
+- Mobile vertical feed, filter sheets, and focused recruiter detail screens.
 - Applause, professional interest, pass, report.
 - Search and filters.
 - Player full profile.
@@ -259,7 +259,7 @@ Exit:
 - Playwright critical journey suite.
 - Five guardian/player and five recruiter usability sessions with test data.
 - Arabic/English/RTL review.
-- Android Chrome, iPhone Safari, desktop Chrome/Edge.
+- Android app on representative low/mid/high-range pilot devices; iOS smoke test when macOS signing access is available.
 - WCAG critical review.
 - Performance and slow-network checks.
 - Operational rehearsal: verification, report, unsafe meeting, user removal, video failure.
@@ -350,7 +350,7 @@ If delivery risk appears, cut in this exact order:
 3. Feed tabs beyond For You, Matching Briefs, and Shortlisted.
 4. Adult public teaser pages; keep marketplace-only.
 5. In-product structured questions on meetings; operator coordinates changes.
-6. PWA installation polish; responsive web still works.
+6. iOS release hardening; Android remains the pilot platform.
 
 Never cut:
 

@@ -6,8 +6,8 @@ ScoutLink is an Egypt-first football talent discovery and facilitated recruitmen
 
 ## Product direction
 
-- Players and guardians get a mobile-first experience for profiles, highlights, consent, and opportunities.
-- Recruiters get a desktop-friendly workspace for discovery, filters, shortlists, professional interest, and meeting requests.
+- Players and guardians use the mobile app for profiles, highlights, consent, and opportunities.
+- Recruiters use the same mobile app for discovery, filters, shortlists, professional interest, and meeting requests.
 - Platform staff verify participants, moderate content, protect minors, and attend every arranged meeting.
 - The pilot targets 50 boys aged 12–19 in Egypt, while verified recruiters may participate globally.
 - The initial pilot is free for both players and recruiters.
@@ -25,7 +25,7 @@ Comments, direct messaging, follower counts, paid boosts, payments, and automate
 ## Architecture
 
 ```text
-Flutter Web / Android / iOS
+Flutter Android / iOS app
             |
        FastAPI REST API
        /       |       \
@@ -33,10 +33,10 @@ PostgreSQL  Storage    Mux video
        |
 Python background worker
 
-Static HTML/CSS marketing site -> CDN
+Static public marketing site -> CDN
 ```
 
-The MVP ships as a responsive Flutter Web/PWA first. The same Flutter codebase can later produce native Android and iOS applications. FastAPI is the only gateway to business data and authorization.
+The MVP ships as one Flutter mobile app. A user chooses player, guardian, recruiter, or academy representative during onboarding; staff roles are assigned by the platform. Android is the pilot target and iOS follows from the same codebase. FastAPI is the only gateway to business data and authorization.
 
 ## Applications
 
@@ -80,7 +80,7 @@ Then run Flutter:
 
 ```powershell
 Set-Location apps/product_flutter
-flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 ```
 
 Authentication also requires the public Supabase client configuration:
@@ -105,7 +105,7 @@ uv run pytest
 Set-Location apps/product_flutter
 flutter analyze
 flutter test
-flutter build web
+flutter build apk --debug
 ```
 
 Never put credentials or real player/minor data in this repository. Use synthetic local data only.

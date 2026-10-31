@@ -4,7 +4,7 @@ Status: authoritative technical specification for the MVP. This supersedes `TECH
 
 ## 1. Architecture decision
 
-Build one responsive Flutter product for players, guardians, recruiters, and platform staff; expose all business operations through a FastAPI modular monolith; use managed PostgreSQL; and keep the public marketing site as semantic HTML/CSS with minimal JavaScript.
+Build one Flutter mobile app for players, guardians, recruiters, academy representatives, and assigned platform staff; expose all business operations through a FastAPI modular monolith; use managed PostgreSQL; and keep the public marketing site as semantic HTML/CSS with minimal JavaScript.
 
 This fits the founding developer's existing skills and preserves a path to Android and iOS without duplicating the product.
 
@@ -20,7 +20,7 @@ This fits the founding developer's existing skills and preserves a path to Andro
 | Video | Mux Direct Uploads, webhooks, signed HLS playback |
 | Search/feed | PostgreSQL indexes, full-text/trigram search, SQL ranking |
 | Background work | PostgreSQL job/outbox tables plus a separate Python worker |
-| Hosting | Static CDN for web clients; Dockerized managed API/worker |
+| Hosting | Static CDN for the marketing site; Dockerized managed API/worker |
 | Monitoring | Structured logs, error tracking, uptime checks, audit log |
 
 ## 2. Product surfaces
@@ -30,14 +30,13 @@ This fits the founding developer's existing skills and preserves a path to Andro
 One codebase, with role-aware navigation and authorization:
 
 - Player/guardian: mobile-first profile management, video upload, status, and meeting coordination.
-- Recruiter: desktop-friendly discovery, filters, video review, shortlists, verified interest, and meeting requests.
-- Platform staff: desktop-first verification, moderation, safeguarding, meeting, and audit workflows.
+- Recruiter: mobile discovery, filters, video review, shortlists, verified interest, and meeting requests.
+- Platform staff: assigned mobile access to verification, moderation, safeguarding, meeting, and audit workflows.
 
 Release order:
 
-1. Responsive Flutter Web/PWA for the pilot.
-2. Android build after pilot hardening or when distribution becomes necessary.
-3. iOS later; building and signing iOS requires macOS and Apple distribution work.
+1. Android app for the pilot.
+2. iOS from the same Flutter codebase after pilot hardening; building and signing requires macOS and Apple distribution work.
 
 ### Public website
 
@@ -46,7 +45,7 @@ Use hand-built HTML/CSS for the landing page, academy recruitment, recruiter app
 ## 3. System shape
 
 ```text
-Flutter Web / Android / iOS
+Flutter Android / iOS app
             |
        HTTPS REST API
             |
@@ -88,7 +87,7 @@ Keep this as one repository and one deployable API during the MVP. Do not introd
 - Dio for HTTP, upload progress, cancellation, and interceptors.
 - `video_player` for HLS playback.
 - Generated immutable JSON models where generation materially reduces mistakes.
-- Secure local storage on native clients; browser sessions follow the authentication provider's supported web storage flow.
+- Secure local storage on mobile clients using the authentication provider's supported session flow.
 
 Pin Flutter with FVM or a documented exact SDK version. Enable strict Dart analysis and prohibit secrets in client builds.
 
@@ -100,7 +99,7 @@ Treat layout as adaptive rather than merely stretched:
 |---|---|
 | Compact, under 600 px | Bottom navigation, single-column, touch-first |
 | Medium, 600–1023 px | Navigation rail, flexible one/two-column layout |
-| Expanded, 1024 px and above | Persistent side navigation, split views, dense recruiter tools |
+| Expanded, 1024 px and above | Large-tablet/foldable navigation rail and optional split detail |
 
 Deep links must open a specific player, highlight, shortlist, meeting, or staff case after authentication. Keyboard navigation, focus order, captions, contrast, and 44–48 px touch targets are acceptance criteria.
 
@@ -239,20 +238,18 @@ Flutter:
 - Integration tests for sign-in, profile publication, upload, discovery, shortlist, meeting, and moderation paths.
 - A small set of golden tests for core design-system components and responsive layouts.
 
-CI must run formatting, static analysis, tests, migration checks, secret scanning, dependency checks, Flutter web build, and Docker image build. A pull request cannot merge with failing required checks.
+CI must run formatting, static analysis, tests, migration checks, secret scanning, dependency checks, Android build, and Docker image build. A pull request cannot merge with failing required checks.
 
 ## 13. Deployment and environments
 
 Maintain local, staging, and production environments with separate databases, storage, authentication projects, video credentials, and secrets.
 
-- Marketing and Flutter Web: static hosting behind a CDN.
+- Marketing site: static hosting behind a CDN.
 - API and worker: separate processes from the same versioned Docker image on a managed container platform.
 - Database/auth/storage: Supabase in a region selected after measuring Egypt and target-recruiter latency.
 - Video: Mux.
 
 Provider selection for static and container hosting is deliberately deferred until a small deployment spike compares Egypt latency, required headers, logs, cost, and operational simplicity. The application remains portable through containers and environment-based configuration.
-
-For Flutter Web, configure the hosting headers required by the chosen renderer. Start with the default supported web build; enable WebAssembly only after browser compatibility and third-party packages are verified.
 
 ## 14. Scaling path
 
@@ -270,14 +267,12 @@ The initial architecture can support the 50-player pilot and growth far beyond i
 
 ## 16. Delivery implication
 
-The existing 12-week MVP plan remains realistic for one full-time developer because it now uses familiar technologies. Flutter Web/PWA is the pilot target; native-store launch is not on the critical path. Android hardening/distribution may add about one week. iOS timing depends on access to macOS and Apple review.
+The existing 12-week MVP plan remains realistic for one full-time developer because it uses familiar technologies. Android is the pilot target. iOS timing depends on access to macOS and Apple review.
 
 ## 17. Primary references
 
 - [Flutter adaptive and responsive design](https://docs.flutter.dev/ui/adaptive-responsive)
-- [Flutter on the web](https://docs.flutter.dev/platform-integration/web)
-- [Flutter web build modes](https://docs.flutter.dev/platform-integration/web/building)
-- [Flutter WebAssembly support](https://docs.flutter.dev/platform-integration/web/wasm)
+- [Flutter supported platforms](https://docs.flutter.dev/reference/supported-platforms)
 - [FastAPI Docker deployment](https://fastapi.tiangolo.com/deployment/docker/)
 - [Supabase Auth](https://supabase.com/docs/guides/auth)
 - [Supabase JWT guidance](https://supabase.com/docs/guides/auth/jwts)

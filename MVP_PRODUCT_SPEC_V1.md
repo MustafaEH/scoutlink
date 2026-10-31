@@ -23,7 +23,9 @@ The MVP is not a transfer marketplace, agency platform, payment system, or footb
 - 10–15 verified Egyptian and international recruiters.
 - Free for players, guardians, academies, and recruiters.
 - Invitation/approval based; not a public open marketplace.
-- Responsive PWA used by every role.
+- One Flutter mobile app used by players, guardians, recruiters, academy representatives, and assigned platform staff.
+- Users choose an eligible starting role during onboarding; staff roles cannot be self-selected.
+- Android is the pilot release target; iOS follows from the same codebase.
 - Platform representative attends every meeting.
 
 ## 3. User roles
@@ -345,8 +347,8 @@ The pilot is validated when it achieves:
 ## 8. Product quality requirements
 
 - Arabic RTL and English supported throughout.
-- Current Android Chrome, iPhone Safari, and desktop Chrome/Edge supported.
-- Mobile-first player experience; desktop-efficient scout/admin experience.
+- Android app supported on representative pilot devices; iOS follows after pilot hardening.
+- Mobile app experience designed for player, guardian, recruiter, academy, and assigned staff roles.
 - WCAG 2.2 AA target.
 - No permanent public URL for private media/documents.
 - Permission checks at UI, API, database/storage, and audit layers.
