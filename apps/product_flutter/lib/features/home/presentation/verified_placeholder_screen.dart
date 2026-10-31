@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
+import 'package:scoutlink_product/features/auth/presentation/sign_out_button.dart';
 import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
 import 'package:scoutlink_product/features/onboarding/domain/onboarding_models.dart';
 
@@ -25,14 +25,7 @@ class VerifiedPlaceholderScreen extends ConsumerWidget {
           'ScoutLink',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Sign out',
-            onPressed: () => ref.read(authRepositoryProvider).signOut(),
-            icon: const Icon(Icons.logout),
-          ),
-          const SizedBox(width: 8),
-        ],
+        actions: [const SignOutButton(), const SizedBox(width: 8)],
       ),
       body: SafeArea(
         child: Center(

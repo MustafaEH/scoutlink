@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
+import 'package:scoutlink_product/features/auth/presentation/sign_out_button.dart';
 
 enum WorkspaceRole {
   player,
@@ -28,17 +27,17 @@ enum WorkspaceRole {
   }
 }
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.role, this.recruiterVerification});
 
   final WorkspaceRole role;
   final String? recruiterVerification;
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   int destination = 0;
 
   static const destinations = [
@@ -59,14 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const _Wordmark(),
-            actions: [
-              IconButton(
-                tooltip: 'Sign out',
-                onPressed: () => ref.read(authRepositoryProvider).signOut(),
-                icon: const Icon(Icons.logout),
-              ),
-              const SizedBox(width: 16),
-            ],
+            actions: [const SignOutButton(), const SizedBox(width: 16)],
           ),
           body: Row(
             children: [

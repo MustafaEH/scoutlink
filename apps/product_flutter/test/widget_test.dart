@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:scoutlink_product/app/app.dart';
 import 'package:scoutlink_product/core/theme/scoutlink_theme.dart';
+import 'package:scoutlink_product/features/auth/application/sign_out_service.dart';
 import 'package:scoutlink_product/features/home/presentation/home_screen.dart';
 import 'package:scoutlink_product/features/home/presentation/verified_placeholder_screen.dart';
 import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
@@ -51,6 +52,7 @@ void main() {
   testWidgets('verified users see the temporary workspace placeholder', (
     tester,
   ) async {
+    var sessionEnded = false;
     final store = MemoryDraftStore()
       ..value = PendingAuth(
         intent: AuthIntent.createProfile,
@@ -65,7 +67,15 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [onboardingDraftStoreProvider.overrideWithValue(store)],
+        overrides: [
+          onboardingDraftStoreProvider.overrideWithValue(store),
+          signOutServiceProvider.overrideWithValue(
+            SignOutService(
+              endSession: () async => sessionEnded = true,
+              clearDeviceData: store.clear,
+            ),
+          ),
+        ],
         child: MaterialApp(
           theme: ScoutLinkTheme.light,
           home: const VerifiedPlaceholderScreen(),
@@ -80,6 +90,12 @@ void main() {
       findsOneWidget,
     );
     expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await tester.tap(find.byTooltip('Sign out'));
+    await tester.pumpAndSettle();
+
+    expect(sessionEnded, isTrue);
+    expect(store.value, isNull);
   });
 
   testWidgets('onboarding introduces ScoutLink before choosing a role', (

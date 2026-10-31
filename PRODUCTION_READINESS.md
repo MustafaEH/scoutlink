@@ -22,6 +22,7 @@ onboarding or home screens.
 - Themed date picker and small-screen scrolling.
 - Email resend cooldown and change-email recovery.
 - Session restoration, logout, timeout, retry, and username-conflict recovery.
+- Account-safe logout clears device-only draft data before another user signs in.
 - Private avatar upload with type/size constraints and owner-only policies.
 - Idempotent profile completion and database uniqueness-race handling.
 - Production configuration validation and disabled API documentation in production.
