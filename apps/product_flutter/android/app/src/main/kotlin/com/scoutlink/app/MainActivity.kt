@@ -1,4 +1,4 @@
-package com.scoutlink.scoutlink_product
+package com.scoutlink.app
 
 import io.flutter.embedding.android.FlutterActivity
 

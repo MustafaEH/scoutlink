@@ -83,16 +83,19 @@ Set-Location apps/product_flutter
 flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-Authentication also requires the public Supabase client configuration:
+Authentication also requires the public Supabase client configuration. On the
+Android emulator, use `10.0.2.2` to reach the API running on the host machine:
 
 ```powershell
-flutter run -d chrome `
-  --dart-define=API_BASE_URL=http://localhost:8000/api/v1 `
-  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co `
+flutter run `
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 `
+  --dart-define=SUPABASE_URL=https://hcdbpescehokdvendcxs.supabase.co `
   --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY
 ```
 
-Configure `SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API. Secret/service-role keys must never be included in Flutter builds.
+Magic links return to `com.scoutlink.app://login-callback/`. Configure
+`SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API.
+Secret/service-role keys must never be included in Flutter builds.
 
 API docs: `http://localhost:8000/docs`. Liveness: `http://localhost:8000/api/v1/health/live`.
 

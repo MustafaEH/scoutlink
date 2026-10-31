@@ -5,7 +5,11 @@ from uuid import UUID, uuid4
 from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from scoutlink_api.db.base import Base
+from scoutlink_api.db.base import APP_SCHEMA, Base
+
+
+def app_foreign_key(target: str, *, ondelete: str | None = None) -> ForeignKey:
+    return ForeignKey(f"{APP_SCHEMA}.{target}", ondelete=ondelete)
 
 
 class UserStatus(StrEnum):
@@ -61,7 +65,9 @@ class UserRole(Base):
     __table_args__ = (UniqueConstraint("user_id", "role"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[UUID] = mapped_column(
+        app_foreign_key("users.id", ondelete="CASCADE"), index=True
+    )
     role: Mapped[RoleName] = mapped_column(Enum(RoleName, native_enum=False, length=40))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -70,7 +76,7 @@ class RecruiterProfile(Base):
     __tablename__ = "recruiter_profiles"
 
     user_id: Mapped[UUID] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+        app_foreign_key("users.id", ondelete="CASCADE"), primary_key=True
     )
     verification_status: Mapped[VerificationStatus] = mapped_column(
         Enum(VerificationStatus, native_enum=False, length=32),
@@ -84,9 +90,9 @@ class Player(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     account_user_id: Mapped[UUID | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL"), unique=True
+        app_foreign_key("users.id", ondelete="SET NULL"), unique=True
     )
-    created_by_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
+    created_by_user_id: Mapped[UUID] = mapped_column(app_foreign_key("users.id"), index=True)
     birth_date: Mapped[date] = mapped_column(Date)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
@@ -96,8 +102,8 @@ class GuardianRelationship(Base):
     __table_args__ = (UniqueConstraint("guardian_user_id", "player_id"),)
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    guardian_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    player_id: Mapped[UUID] = mapped_column(ForeignKey("players.id"), index=True)
+    guardian_user_id: Mapped[UUID] = mapped_column(app_foreign_key("users.id"), index=True)
+    player_id: Mapped[UUID] = mapped_column(app_foreign_key("players.id"), index=True)
     relationship_type: Mapped[str] = mapped_column(String(50))
     status: Mapped[RelationshipStatus] = mapped_column(
         Enum(RelationshipStatus, native_enum=False, length=32),
@@ -110,8 +116,8 @@ class ConsentRecord(Base):
     __tablename__ = "consent_records"
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
-    user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), index=True)
-    player_id: Mapped[UUID | None] = mapped_column(ForeignKey("players.id"), index=True)
+    user_id: Mapped[UUID] = mapped_column(app_foreign_key("users.id"), index=True)
+    player_id: Mapped[UUID | None] = mapped_column(app_foreign_key("players.id"), index=True)
     consent_type: Mapped[str] = mapped_column(String(60))
     document_version: Mapped[str] = mapped_column(String(30))
     granted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

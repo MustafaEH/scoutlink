@@ -8,6 +8,10 @@ abstract final class AppConfig {
   static const supabasePublishableKey = String.fromEnvironment(
     'SUPABASE_PUBLISHABLE_KEY',
   );
+  static const authRedirectUrl = String.fromEnvironment(
+    'AUTH_REDIRECT_URL',
+    defaultValue: 'com.scoutlink.app://login-callback/',
+  );
 
   static bool get isAuthConfigured =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;
