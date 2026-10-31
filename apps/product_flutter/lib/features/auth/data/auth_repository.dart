@@ -7,6 +7,8 @@ class AuthRepository {
 
   final SupabaseClient client;
 
+  Session? get currentSession => client.auth.currentSession;
+
   Stream<Session?> sessions() async* {
     yield client.auth.currentSession;
     yield* client.auth.onAuthStateChange.map((event) => event.session);

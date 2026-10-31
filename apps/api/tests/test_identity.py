@@ -3,6 +3,7 @@ from datetime import date
 import pytest
 from fastapi import HTTPException
 from scoutlink_api.modules.identity.models import RoleName
+from scoutlink_api.modules.identity.schemas import CompleteOnboardingRequest
 from scoutlink_api.modules.identity.service import (
     SELF_ASSIGNABLE_ROLES,
     age_on,
@@ -26,6 +27,7 @@ def test_staff_roles_cannot_be_self_assigned() -> None:
     assert RoleName.ADMINISTRATOR not in SELF_ASSIGNABLE_ROLES
     assert RoleName.OPERATOR not in SELF_ASSIGNABLE_ROLES
     assert RoleName.SAFEGUARDING_ADMIN not in SELF_ASSIGNABLE_ROLES
+    assert RoleName.PLAYER in SELF_ASSIGNABLE_ROLES
 
 
 def test_role_cannot_be_changed_without_support() -> None:
@@ -47,4 +49,25 @@ def test_identity_routes_are_protected_in_openapi() -> None:
 
     schema = app.openapi()
     operation = schema["paths"]["/api/v1/identity/me"]["get"]
+    assert operation["security"] == [{"HTTPBearer": []}]
+
+
+def test_onboarding_normalizes_username_and_text() -> None:
+    request = CompleteOnboardingRequest(
+        role=RoleName.PLAYER,
+        full_name="  Ahmed Ali  ",
+        username="Ahmed_10",
+        birth_date=date(2010, 1, 2),
+        position="  Winger  ",
+    )
+
+    assert request.full_name == "Ahmed Ali"
+    assert request.username == "ahmed_10"
+    assert request.position == "Winger"
+
+
+def test_onboarding_route_is_protected_in_openapi() -> None:
+    from scoutlink_api.main import app
+
+    operation = app.openapi()["paths"]["/api/v1/identity/onboarding"]["post"]
     assert operation["security"] == [{"HTTPBearer": []}]

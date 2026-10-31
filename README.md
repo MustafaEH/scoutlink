@@ -97,6 +97,12 @@ Magic links return to `com.scoutlink.app://login-callback/`. Configure
 `SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API.
 Secret/service-role keys must never be included in Flutter builds.
 
+Product tables live in the private `app` PostgreSQL schema. In the Supabase
+Table Editor, change the schema selector from `public` to `app` to inspect
+`users`, `players`, `recruiter_profiles`, and the supporting identity tables.
+Keeping these tables outside `public` prevents the mobile client from bypassing
+the FastAPI authorization layer.
+
 API docs: `http://localhost:8000/docs`. Liveness: `http://localhost:8000/api/v1/health/live`.
 
 ## Quality checks

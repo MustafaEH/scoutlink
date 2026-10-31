@@ -19,7 +19,7 @@ class UserStatus(StrEnum):
 
 
 class RoleName(StrEnum):
-    ADULT_PLAYER = "adult_player"
+    PLAYER = "player"
     GUARDIAN = "guardian"
     RECRUITER = "recruiter"
     ACADEMY_REPRESENTATIVE = "academy_representative"
@@ -50,6 +50,10 @@ class User(Base):
 
     id: Mapped[UUID] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(320), unique=True, index=True)
+    full_name: Mapped[str | None] = mapped_column(String(120))
+    username: Mapped[str | None] = mapped_column(String(24), unique=True, index=True)
+    avatar_object_path: Mapped[str | None] = mapped_column(String(500))
+    onboarding_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     status: Mapped[UserStatus] = mapped_column(
         Enum(UserStatus, native_enum=False, length=32), default=UserStatus.ACTIVE
     )
@@ -82,6 +86,8 @@ class RecruiterProfile(Base):
         Enum(VerificationStatus, native_enum=False, length=32),
         default=VerificationStatus.PENDING,
     )
+    country: Mapped[str | None] = mapped_column(String(80))
+    organization_name: Mapped[str | None] = mapped_column(String(160))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -94,6 +100,8 @@ class Player(Base):
     )
     created_by_user_id: Mapped[UUID] = mapped_column(app_foreign_key("users.id"), index=True)
     birth_date: Mapped[date] = mapped_column(Date)
+    position: Mapped[str | None] = mapped_column(String(40))
+    preferred_foot: Mapped[str | None] = mapped_column(String(10))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

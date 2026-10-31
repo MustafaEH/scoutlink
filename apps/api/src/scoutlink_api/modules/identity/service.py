@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -14,10 +15,14 @@ from scoutlink_api.modules.identity.models import (
     User,
     UserRole,
 )
-from scoutlink_api.modules.identity.schemas import GuardianPlayerCreate, IdentityResponse
+from scoutlink_api.modules.identity.schemas import (
+    CompleteOnboardingRequest,
+    GuardianPlayerCreate,
+    IdentityResponse,
+)
 
 SELF_ASSIGNABLE_ROLES = {
-    RoleName.ADULT_PLAYER,
+    RoleName.PLAYER,
     RoleName.GUARDIAN,
     RoleName.RECRUITER,
     RoleName.ACADEMY_REPRESENTATIVE,
@@ -68,6 +73,9 @@ async def identity_response(session: AsyncSession, user: User) -> IdentityRespon
     return IdentityResponse(
         id=user.id,
         email=user.email,
+        full_name=user.full_name,
+        username=user.username,
+        onboarding_complete=user.onboarding_completed_at is not None,
         status=user.status,
         roles=[assignment.role for assignment in user.roles],
         recruiter_verification=recruiter.verification_status if recruiter else None,
@@ -83,6 +91,84 @@ async def select_role(session: AsyncSession, user: User, role: RoleName) -> Iden
             session.add(RecruiterProfile(user_id=user.id))
         await session.commit()
         await session.refresh(user, attribute_names=["roles"])
+    return await identity_response(session, user)
+
+
+async def complete_onboarding(
+    session: AsyncSession, user: User, request: CompleteOnboardingRequest
+) -> IdentityResponse:
+    if request.role not in {RoleName.PLAYER, RoleName.RECRUITER}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"code": "unsupported_onboarding_role", "message": "Choose player or scout."},
+        )
+
+    existing_roles = {assignment.role for assignment in user.roles}
+    validate_role_selection(existing_roles, request.role)
+
+    username_owner = await session.scalar(
+        select(User).where(User.username == request.username, User.id != user.id)
+    )
+    if username_owner is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "username_taken", "message": "That username is already taken."},
+        )
+
+    user.full_name = request.full_name
+    user.username = request.username
+    user.avatar_object_path = request.avatar_object_path
+
+    if request.role == RoleName.PLAYER:
+        if request.birth_date is None or request.position is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "player_details_required",
+                    "message": "Player date of birth and position are required.",
+                },
+            )
+        player_age = age_on(request.birth_date, date.today())
+        if player_age < 6 or player_age > 23:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "player_age_out_of_range",
+                    "message": "Player profiles are currently available for ages 6-23.",
+                },
+            )
+        player = await session.scalar(select(Player).where(Player.account_user_id == user.id))
+        if player is None:
+            player = Player(
+                account_user_id=user.id,
+                created_by_user_id=user.id,
+                birth_date=request.birth_date,
+            )
+            session.add(player)
+        player.birth_date = request.birth_date
+        player.position = request.position
+        player.preferred_foot = request.preferred_foot
+    else:
+        if request.country is None:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={
+                    "code": "scout_country_required",
+                    "message": "Scout country is required.",
+                },
+            )
+        recruiter = await session.get(RecruiterProfile, user.id)
+        if recruiter is None:
+            recruiter = RecruiterProfile(user_id=user.id)
+            session.add(recruiter)
+        recruiter.country = request.country
+        recruiter.organization_name = request.organization_name
+
+    if request.role not in existing_roles:
+        session.add(UserRole(user_id=user.id, role=request.role))
+    user.onboarding_completed_at = datetime.now(UTC)
+    await session.commit()
+    await session.refresh(user, attribute_names=["roles"])
     return await identity_response(session, user)
 
 
