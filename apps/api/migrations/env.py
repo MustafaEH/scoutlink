@@ -4,6 +4,7 @@ from logging.config import fileConfig
 from alembic import context
 from scoutlink_api.core.config import get_settings
 from scoutlink_api.db.base import Base
+from scoutlink_api.modules.identity import models as identity_models  # noqa: F401
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 

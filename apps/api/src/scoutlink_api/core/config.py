@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     supabase_url: str | None = None
     supabase_jwt_issuer: str | None = None
     supabase_jwt_audience: str = "authenticated"
+    supabase_jwks_url: str | None = None
     mux_token_id: str | None = None
     mux_token_secret: str | None = None
     mux_webhook_secret: str | None = None

@@ -83,6 +83,17 @@ Set-Location apps/product_flutter
 flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 ```
 
+Authentication also requires the public Supabase client configuration:
+
+```powershell
+flutter run -d chrome `
+  --dart-define=API_BASE_URL=http://localhost:8000/api/v1 `
+  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co `
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY
+```
+
+Configure `SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API. Secret/service-role keys must never be included in Flutter builds.
+
 API docs: `http://localhost:8000/docs`. Liveness: `http://localhost:8000/api/v1/health/live`.
 
 ## Quality checks

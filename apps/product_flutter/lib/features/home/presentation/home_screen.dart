@@ -1,26 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scoutlink_product/core/theme/scoutlink_theme.dart';
+import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
 
-enum DemoRole { player, recruiter, staff }
+enum WorkspaceRole {
+  player,
+  guardian,
+  recruiter,
+  academy,
+  staff;
 
-extension on DemoRole {
-  String get label => switch (this) {
-    DemoRole.player => 'Player',
-    DemoRole.recruiter => 'Recruiter',
-    DemoRole.staff => 'Platform staff',
-  };
+  factory WorkspaceRole.fromRoles(List<String> roles) {
+    if (roles.any(
+      {'administrator', 'operator', 'safeguarding_admin'}.contains,
+    )) {
+      return staff;
+    }
+    if (roles.contains('recruiter')) {
+      return recruiter;
+    }
+    if (roles.contains('guardian')) {
+      return guardian;
+    }
+    if (roles.contains('academy_representative')) {
+      return academy;
+    }
+    return player;
+  }
 }
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, required this.role, this.recruiterVerification});
+
+  final WorkspaceRole role;
+  final String? recruiterVerification;
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  DemoRole role = DemoRole.player;
   int destination = 0;
 
   static const destinations = [
@@ -42,19 +61,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           appBar: AppBar(
             title: const _Wordmark(),
             actions: [
-              DropdownButtonHideUnderline(
-                child: DropdownButton<DemoRole>(
-                  value: role,
-                  borderRadius: BorderRadius.circular(8),
-                  items: [
-                    for (final item in DemoRole.values)
-                      DropdownMenuItem(
-                        value: item,
-                        child: Text('${item.label} preview'),
-                      ),
-                  ],
-                  onChanged: (value) => setState(() => role = value ?? role),
-                ),
+              IconButton(
+                tooltip: 'Sign out',
+                onPressed: () => ref.read(authRepositoryProvider).signOut(),
+                icon: const Icon(Icons.logout),
               ),
               const SizedBox(width: 16),
             ],
@@ -75,7 +85,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                   ],
                 ),
-              Expanded(child: _Dashboard(role: role)),
+              Expanded(
+                child: _Dashboard(
+                  role: widget.role,
+                  recruiterVerification: widget.recruiterVerification,
+                ),
+              ),
             ],
           ),
           bottomNavigationBar: expanded
@@ -116,25 +131,38 @@ class _Wordmark extends StatelessWidget {
 }
 
 class _Dashboard extends StatelessWidget {
-  const _Dashboard({required this.role});
-  final DemoRole role;
+  const _Dashboard({required this.role, required this.recruiterVerification});
+  final WorkspaceRole role;
+  final String? recruiterVerification;
 
   @override
   Widget build(BuildContext context) {
     final content = switch (role) {
-      DemoRole.player => (
+      WorkspaceRole.player => (
         'PLAYER HOME',
         'Build the profile that gets you seen.',
         'Continue profile',
         0.62,
       ),
-      DemoRole.recruiter => (
+      WorkspaceRole.guardian => (
+        'GUARDIAN HOME',
+        'Guide your player through a safe opportunity path.',
+        'Add a player',
+        0.12,
+      ),
+      WorkspaceRole.recruiter => (
         'RECRUITER DESK',
         'Find talent with evidence, not noise.',
         'Explore players',
         0.28,
       ),
-      DemoRole.staff => (
+      WorkspaceRole.academy => (
+        'ACADEMY DESK',
+        'Help credible talent records stand up to review.',
+        'View affiliations',
+        0.20,
+      ),
+      WorkspaceRole.staff => (
         'OPERATIONS DESK',
         'Keep every opportunity safe and moving.',
         'Open review queue',
@@ -167,6 +195,14 @@ class _Dashboard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
+              if (role == WorkspaceRole.recruiter) ...[
+                Chip(
+                  label: Text(
+                    'Verification: ${recruiterVerification ?? 'pending'}',
+                  ),
+                ),
+                const SizedBox(height: 18),
+              ],
               const Text(
                 'Focused profiles, approved highlights, and platform-facilitated meetings.',
                 style: TextStyle(fontSize: 18, height: 1.5),
