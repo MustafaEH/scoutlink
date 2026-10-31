@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -117,6 +118,16 @@ async def complete_onboarding(
 
     user.full_name = request.full_name
     user.username = request.username
+    if request.avatar_object_path is not None and not request.avatar_object_path.startswith(
+        f"{user.id}/"
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "code": "invalid_avatar_path",
+                "message": "The profile photo does not belong to this account.",
+            },
+        )
     user.avatar_object_path = request.avatar_object_path
 
     if request.role == RoleName.PLAYER:
@@ -167,7 +178,14 @@ async def complete_onboarding(
     if request.role not in existing_roles:
         session.add(UserRole(user_id=user.id, role=request.role))
     user.onboarding_completed_at = datetime.now(UTC)
-    await session.commit()
+    try:
+        await session.commit()
+    except IntegrityError as error:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail={"code": "username_taken", "message": "That username is already taken."},
+        ) from error
     await session.refresh(user, attribute_names=["roles"])
     return await identity_response(session, user)
 

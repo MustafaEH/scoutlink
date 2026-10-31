@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scoutlink_product/core/config/app_config.dart';
 import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
 import 'package:scoutlink_product/features/auth/application/identity_providers.dart';
+import 'package:scoutlink_product/features/auth/data/identity_repository.dart';
 import 'package:scoutlink_product/features/home/presentation/home_screen.dart';
+import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
+import 'package:scoutlink_product/features/onboarding/data/onboarding_draft_store.dart';
+import 'package:scoutlink_product/features/onboarding/data/profile_media_repository.dart';
 import 'package:scoutlink_product/features/onboarding/presentation/onboarding_flow.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -33,11 +37,38 @@ class _IdentityGate extends ConsumerWidget {
         .watch(identityProvider)
         .when(
           loading: () => const _LoadingScreen(),
-          error: (error, _) => _ErrorScreen(
-            message: 'We could not load your ScoutLink account.',
-            onRetry: () => ref.invalidate(identityProvider),
-            onStartOver: () => ref.read(authRepositoryProvider).signOut(),
-          ),
+          error: (error, _) {
+            if (error is IdentityFailure &&
+                {
+                  'username_taken',
+                  'player_age_out_of_range',
+                  'player_details_required',
+                  'scout_country_required',
+                  'invalid_avatar_path',
+                }.contains(error.code)) {
+              return _CompletionRecovery(
+                code: error.code,
+                message: error.message,
+              );
+            }
+            if (error is ProfileMediaFailure) {
+              return _CompletionRecovery(
+                code: 'photo_upload_failed',
+                message: error.message,
+              );
+            }
+            return _ErrorScreen(
+              message: error is IdentityFailure
+                  ? error.message
+                  : 'We could not load your ScoutLink account.',
+              onRetry: () => ref.invalidate(identityProvider),
+              onStartOver: () async {
+                await ref.read(onboardingDraftStoreProvider).clear();
+                ref.invalidate(onboardingControllerProvider);
+                await ref.read(authRepositoryProvider).signOut();
+              },
+            );
+          },
           data: (identity) {
             if (identity == null || identity.roles.isEmpty) {
               return const OnboardingFlow();
@@ -48,6 +79,34 @@ class _IdentityGate extends ConsumerWidget {
             );
           },
         );
+  }
+}
+
+class _CompletionRecovery extends ConsumerStatefulWidget {
+  const _CompletionRecovery({required this.code, required this.message});
+  final String code;
+  final String message;
+
+  @override
+  ConsumerState<_CompletionRecovery> createState() =>
+      _CompletionRecoveryState();
+}
+
+class _CompletionRecoveryState extends ConsumerState<_CompletionRecovery> {
+  bool applied = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!applied) {
+      applied = true;
+      Future<void>(() async {
+        await ref.read(onboardingControllerProvider.future);
+        ref
+            .read(onboardingControllerProvider.notifier)
+            .showCompletionError(widget.code, widget.message);
+      });
+    }
+    return const OnboardingFlow();
   }
 }
 

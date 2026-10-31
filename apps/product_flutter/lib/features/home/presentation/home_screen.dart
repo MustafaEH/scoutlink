@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:scoutlink_product/core/theme/scoutlink_theme.dart';
 import 'package:scoutlink_product/features/auth/application/auth_providers.dart';
 
 enum WorkspaceRole {
@@ -112,19 +111,20 @@ class _Wordmark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    final colors = Theme.of(context).colorScheme;
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
           radius: 17,
-          backgroundColor: ScoutLinkColors.field,
-          child: Text(
+          backgroundColor: colors.primary,
+          child: const Text(
             'S',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800),
           ),
         ),
-        SizedBox(width: 10),
-        Text('ScoutLink', style: TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(width: 10),
+        const Text('ScoutLink', style: TextStyle(fontWeight: FontWeight.w800)),
       ],
     );
   }
@@ -180,8 +180,8 @@ class _Dashboard extends StatelessWidget {
               const SizedBox(height: 40),
               Text(
                 content.$1,
-                style: const TextStyle(
-                  color: ScoutLinkColors.field,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.8,
                 ),
@@ -237,9 +237,9 @@ class _Dashboard extends StatelessWidget {
                   padding: const EdgeInsets.all(24),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.shield_outlined,
-                        color: ScoutLinkColors.field,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                       const SizedBox(width: 16),
                       Expanded(

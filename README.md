@@ -2,7 +2,9 @@
 
 ScoutLink is an Egypt-first football talent discovery and facilitated recruitment platform. It helps ambitious young players present credible football profiles and focused match footage, while recruiters discover talent and request safe, platform-facilitated meetings.
 
-> **Status:** early MVP development. The current repository contains the product specifications and the first working technical foundation; it is not yet ready for real player data or public registration.
+> **Status:** MVP development. Authentication and Player/Scout onboarding are
+> implemented and hardened, but public registration remains disabled until the
+> production API, SMTP delivery, store signing, and safeguarding approval are in place.
 
 ## Product direction
 
@@ -36,7 +38,10 @@ Python background worker
 Static public marketing site -> CDN
 ```
 
-The MVP ships as one Flutter mobile app. A user chooses player, guardian, recruiter, or academy representative during onboarding; staff roles are assigned by the platform. Android is the pilot target and iOS follows from the same codebase. FastAPI is the only gateway to business data and authorization.
+The MVP ships as one Flutter mobile app. Initial onboarding exposes Player and
+Scout roles; other role types remain backend foundations for later milestones.
+Android is the pilot target and iOS follows from the same codebase. FastAPI is
+the only gateway to business data and authorization.
 
 ## Applications
 
@@ -103,6 +108,18 @@ Table Editor, change the schema selector from `public` to `app` to inspect
 Keeping these tables outside `public` prevents the mobile client from bypassing
 the FastAPI authorization layer.
 
+Unfinished onboarding data is encrypted in device secure storage. Player profile
+photos use the private `profile-images` bucket, a 5 MB limit, and owner-only
+Storage policies. No profile-image bucket should be made public.
+
+For Android release builds, create a private upload keystore and an ignored
+`apps/product_flutter/android/key.properties`. The project deliberately produces
+an unsigned release when that owner-controlled file is absent; it never falls
+back to a debug signing key.
+
+See [`PRODUCTION_READINESS.md`](./PRODUCTION_READINESS.md) before enabling public
+registration or installing a release build outside the development team.
+
 API docs: `http://localhost:8000/docs`. Liveness: `http://localhost:8000/api/v1/health/live`.
 
 ## Quality checks
@@ -121,7 +138,9 @@ Never put credentials or real player/minor data in this repository. Use syntheti
 
 ## Roadmap
 
-The next milestone implements authentication, user roles, recruiter verification states, and guardian-to-player relationships. Profiles, media, discovery, and meetings build on that identity and authorization layer.
+The next milestone begins only after the external production-readiness gates are
+complete. Player profiles, discovery, highlights, and meetings build on this
+identity and authorization layer.
 
 ## Contributing and licensing
 

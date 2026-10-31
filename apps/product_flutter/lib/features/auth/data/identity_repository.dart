@@ -1,6 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:scoutlink_product/core/api/api_client.dart';
-import 'package:scoutlink_product/features/onboarding/data/onboarding_draft.dart';
+import 'package:scoutlink_product/features/onboarding/domain/onboarding_models.dart';
+
+class IdentityFailure implements Exception {
+  const IdentityFailure(this.code, this.message);
+  final String code;
+  final String message;
+
+  @override
+  String toString() => message;
+}
 
 class Identity {
   const Identity({
@@ -41,8 +50,12 @@ class IdentityRepository {
   final Dio client;
 
   Future<Identity> getMe() async {
-    final response = await client.get<Map<String, dynamic>>('/identity/me');
-    return Identity.fromJson(response.data!);
+    try {
+      final response = await client.get<Map<String, dynamic>>('/identity/me');
+      return Identity.fromJson(response.data!);
+    } on DioException catch (error) {
+      throw _failure(error);
+    }
   }
 
   Future<Identity> chooseRole(String role) async {
@@ -54,10 +67,37 @@ class IdentityRepository {
   }
 
   Future<Identity> completeOnboarding(OnboardingDraft draft) async {
-    final response = await client.post<Map<String, dynamic>>(
-      '/identity/onboarding',
-      data: draft.toApiJson(),
+    try {
+      final response = await client.post<Map<String, dynamic>>(
+        '/identity/onboarding',
+        data: draft.toApiJson(),
+      );
+      return Identity.fromJson(response.data!);
+    } on DioException catch (error) {
+      throw _failure(error);
+    }
+  }
+
+  IdentityFailure _failure(DioException error) {
+    final data = error.response?.data;
+    final detail = data is Map<String, dynamic> ? data['detail'] : null;
+    if (detail is Map<String, dynamic>) {
+      return IdentityFailure(
+        detail['code'] as String? ?? 'request_failed',
+        detail['message'] as String? ?? 'We could not update your profile.',
+      );
+    }
+    if (error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.receiveTimeout ||
+        error.type == DioExceptionType.connectionError) {
+      return const IdentityFailure(
+        'network_unavailable',
+        'ScoutLink could not reach the server. Check your connection and try again.',
+      );
+    }
+    return const IdentityFailure(
+      'request_failed',
+      'Something went wrong while loading your account. Try again.',
     );
-    return Identity.fromJson(response.data!);
   }
 }

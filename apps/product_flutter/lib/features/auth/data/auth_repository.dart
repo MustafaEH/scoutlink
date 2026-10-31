@@ -14,10 +14,19 @@ class AuthRepository {
     yield* client.auth.onAuthStateChange.map((event) => event.session);
   }
 
-  Future<void> sendMagicLink(String email) async {
+  Future<void> sendSignUpLink(String email) async {
     await client.auth.signInWithOtp(
       email: email.trim().toLowerCase(),
       emailRedirectTo: AppConfig.authRedirectUrl,
+      shouldCreateUser: true,
+    );
+  }
+
+  Future<void> sendSignInLink(String email) async {
+    await client.auth.signInWithOtp(
+      email: email.trim().toLowerCase(),
+      emailRedirectTo: AppConfig.authRedirectUrl,
+      shouldCreateUser: false,
     );
   }
 
