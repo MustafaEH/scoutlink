@@ -5,6 +5,7 @@ import 'package:scoutlink_product/features/auth/application/auth_providers.dart'
 import 'package:scoutlink_product/features/auth/application/identity_providers.dart';
 import 'package:scoutlink_product/features/auth/data/identity_repository.dart';
 import 'package:scoutlink_product/features/home/presentation/home_screen.dart';
+import 'package:scoutlink_product/features/home/presentation/verified_placeholder_screen.dart';
 import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
 import 'package:scoutlink_product/features/onboarding/data/onboarding_draft_store.dart';
 import 'package:scoutlink_product/features/onboarding/data/profile_media_repository.dart';
@@ -20,12 +21,17 @@ class AuthGate extends ConsumerWidget {
     return sessionState.when(
       loading: () => ref.read(authRepositoryProvider).currentSession == null
           ? const OnboardingFlow()
-          : const _IdentityGate(),
+          : _authenticatedDestination(),
       error: (error, _) => _ErrorScreen(message: error.toString()),
-      data: (session) =>
-          session == null ? const OnboardingFlow() : const _IdentityGate(),
+      data: (session) => session == null
+          ? const OnboardingFlow()
+          : _authenticatedDestination(),
     );
   }
+
+  Widget _authenticatedDestination() => AppConfig.identityApiEnabled
+      ? const _IdentityGate()
+      : const VerifiedPlaceholderScreen();
 }
 
 class _IdentityGate extends ConsumerWidget {

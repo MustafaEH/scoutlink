@@ -12,6 +12,10 @@ abstract final class AppConfig {
     'AUTH_REDIRECT_URL',
     defaultValue: 'com.scoutlink.app://login-callback/',
   );
+  static const identityApiEnabled = bool.fromEnvironment(
+    'IDENTITY_API_ENABLED',
+    defaultValue: false,
+  );
 
   static bool get isAuthConfigured =>
       supabaseUrl.isNotEmpty && supabasePublishableKey.isNotEmpty;

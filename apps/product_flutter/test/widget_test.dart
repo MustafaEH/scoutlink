@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:scoutlink_product/app/app.dart';
 import 'package:scoutlink_product/core/theme/scoutlink_theme.dart';
 import 'package:scoutlink_product/features/home/presentation/home_screen.dart';
+import 'package:scoutlink_product/features/home/presentation/verified_placeholder_screen.dart';
 import 'package:scoutlink_product/features/onboarding/application/onboarding_controller.dart';
 import 'package:scoutlink_product/features/onboarding/data/onboarding_draft_store.dart';
 import 'package:scoutlink_product/features/onboarding/domain/onboarding_models.dart';
@@ -45,6 +46,40 @@ void main() {
     expect(find.text('ScoutLink'), findsOneWidget);
     expect(find.text('Build the profile that gets you seen.'), findsOneWidget);
     expect(find.text('Continue profile'), findsOneWidget);
+  });
+
+  testWidgets('verified users see the temporary workspace placeholder', (
+    tester,
+  ) async {
+    final store = MemoryDraftStore()
+      ..value = PendingAuth(
+        intent: AuthIntent.createProfile,
+        email: 'omar@example.com',
+        step: OnboardingStep.emailSent,
+        draft: const OnboardingDraft(
+          role: OnboardingRole.player,
+          fullName: 'Omar Hassan',
+          email: 'omar@example.com',
+        ),
+      );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [onboardingDraftStoreProvider.overrideWithValue(store)],
+        child: MaterialApp(
+          theme: ScoutLinkTheme.light,
+          home: const VerifiedPlaceholderScreen(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('You’re verified, Omar'), findsOneWidget);
+    expect(
+      find.text('Your Player workspace is being prepared.'),
+      findsOneWidget,
+    );
+    expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
   testWidgets('onboarding introduces ScoutLink before choosing a role', (

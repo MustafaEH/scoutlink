@@ -60,6 +60,10 @@ The Flutter release requires compile-time public configuration:
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
 - `AUTH_REDIRECT_URL=com.scoutlink.app://login-callback/`
+- `IDENTITY_API_ENABLED=true` once the production API is deployed and verified
+
+Until `IDENTITY_API_ENABLED` is enabled, verified users are intentionally routed
+to the temporary post-verification placeholder without calling the identity API.
 
 Service-role, database, SMTP, signing, and monitoring secrets must never be
 passed to Flutter or committed to Git.
