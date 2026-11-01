@@ -16,4 +16,5 @@ blocked.
 
 | ID | Feature | Status | Branch | QA report |
 | --- | --- | --- | --- | --- |
+| [SL-001](./SL-001-player-profile-basics.md) | Player profile basics and football identity draft | Ready | `codex/sl-001-player-profile-basics` | `docs/qa/SL-001-qa.md` |
 
