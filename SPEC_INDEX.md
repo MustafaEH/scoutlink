@@ -1,6 +1,6 @@
 # ScoutLink v1.0 Specification Index
 
-Date: 30 October 2026  
+Date: 30 October 2026
 Status: Authoritative documents for MVP implementation
 
 ## Build from these documents
@@ -18,6 +18,12 @@ Status: Authoritative documents for MVP implementation
 - [Build With Me social series](./BUILD_WITH_ME_SERIES.md)
 - [Founder partnership framework](./FOUNDER_PARTNERSHIP.md)
 - [Earlier full product strategy](./PRODUCT_SPEC.md)
+
+## Delivery operations
+
+- [Feature ticket board](./docs/tickets/README.md) - one vertical feature at a time.
+- [Ticket template](./docs/tickets/TEMPLATE.md) - implementation contract and definition of done.
+- [QA report template](./docs/qa/TEMPLATE.md) - independent evidence and release verdict.
 
 ## Authority rule
 
