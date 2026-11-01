@@ -2,12 +2,14 @@
 
 ScoutLink is an Egypt-first football talent discovery and facilitated recruitment platform. It helps ambitious young players present credible football profiles and focused match footage, while recruiters discover talent and request safe, platform-facilitated meetings.
 
-> **Status:** early MVP development. The current repository contains the product specifications and the first working technical foundation; it is not yet ready for real player data or public registration.
+> **Status:** MVP development. Authentication and Player/Scout onboarding are
+> implemented and hardened, but public registration remains disabled until the
+> production API, SMTP delivery, store signing, and safeguarding approval are in place.
 
 ## Product direction
 
-- Players and guardians get a mobile-first experience for profiles, highlights, consent, and opportunities.
-- Recruiters get a desktop-friendly workspace for discovery, filters, shortlists, professional interest, and meeting requests.
+- Players and guardians use the mobile app for profiles, highlights, consent, and opportunities.
+- Recruiters use the same mobile app for discovery, filters, shortlists, professional interest, and meeting requests.
 - Platform staff verify participants, moderate content, protect minors, and attend every arranged meeting.
 - The pilot targets 50 boys aged 12–19 in Egypt, while verified recruiters may participate globally.
 - The initial pilot is free for both players and recruiters.
@@ -25,7 +27,7 @@ Comments, direct messaging, follower counts, paid boosts, payments, and automate
 ## Architecture
 
 ```text
-Flutter Web / Android / iOS
+Flutter Android / iOS app
             |
        FastAPI REST API
        /       |       \
@@ -33,10 +35,13 @@ PostgreSQL  Storage    Mux video
        |
 Python background worker
 
-Static HTML/CSS marketing site -> CDN
+Static public marketing site -> CDN
 ```
 
-The MVP ships as a responsive Flutter Web/PWA first. The same Flutter codebase can later produce native Android and iOS applications. FastAPI is the only gateway to business data and authorization.
+The MVP ships as one Flutter mobile app. Initial onboarding exposes Player and
+Scout roles; other role types remain backend foundations for later milestones.
+Android is the pilot target and iOS follows from the same codebase. FastAPI is
+the only gateway to business data and authorization.
 
 ## Applications
 
@@ -59,6 +64,8 @@ Key documents:
 ## Current foundation
 
 - Responsive role-aware Flutter shell with custom ScoutLink theme.
+- Persistent Supabase magic-link authentication with account-safe logout.
+- Encrypted Player/Scout onboarding drafts and a temporary verified-user placeholder.
 - FastAPI application with versioned routing and health endpoints.
 - Async SQLAlchemy/PostgreSQL configuration and Alembic foundation.
 - Background worker entry point.
@@ -80,19 +87,47 @@ Then run Flutter:
 
 ```powershell
 Set-Location apps/product_flutter
-flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+flutter run --dart-define=API_BASE_URL=http://localhost:8000/api/v1
 ```
 
-Authentication also requires the public Supabase client configuration:
+Authentication also requires the public Supabase client configuration. On the
+Android emulator, use `10.0.2.2` to reach the API running on the host machine:
 
 ```powershell
-flutter run -d chrome `
-  --dart-define=API_BASE_URL=http://localhost:8000/api/v1 `
-  --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co `
-  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY
+flutter run `
+  --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1 `
+  --dart-define=SUPABASE_URL=https://hcdbpescehokdvendcxs.supabase.co `
+  --dart-define=SUPABASE_PUBLISHABLE_KEY=YOUR_PUBLIC_KEY `
+  --dart-define=AUTH_REDIRECT_URL=com.scoutlink.app://login-callback/
 ```
 
-Configure `SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API. Secret/service-role keys must never be included in Flutter builds.
+Magic links return to `com.scoutlink.app://login-callback/`. Configure
+`SCOUTLINK_SUPABASE_JWT_ISSUER` and `SCOUTLINK_SUPABASE_JWKS_URL` for the API.
+Secret/service-role keys must never be included in Flutter builds.
+
+Supabase restores the signed-in session when the app restarts. Logout revokes
+the session and clears device-only onboarding data so multiple test accounts do
+not share local profile details. Until the deployed identity API is ready,
+verified users see the temporary placeholder; enable the real completion path
+with `--dart-define=IDENTITY_API_ENABLED=true` only in a connected environment.
+
+Product tables live in the private `app` PostgreSQL schema. In the Supabase
+Table Editor, change the schema selector from `public` to `app` to inspect
+`users`, `players`, `recruiter_profiles`, and the supporting identity tables.
+Keeping these tables outside `public` prevents the mobile client from bypassing
+the FastAPI authorization layer.
+
+Unfinished onboarding data is encrypted in device secure storage. Player profile
+photos use the private `profile-images` bucket, a 5 MB limit, and owner-only
+Storage policies. No profile-image bucket should be made public.
+
+For Android release builds, create a private upload keystore and an ignored
+`apps/product_flutter/android/key.properties`. The project deliberately produces
+an unsigned release when that owner-controlled file is absent; it never falls
+back to a debug signing key.
+
+See [`PRODUCTION_READINESS.md`](./PRODUCTION_READINESS.md) before enabling public
+registration or installing a release build outside the development team.
 
 API docs: `http://localhost:8000/docs`. Liveness: `http://localhost:8000/api/v1/health/live`.
 
@@ -105,14 +140,16 @@ uv run pytest
 Set-Location apps/product_flutter
 flutter analyze
 flutter test
-flutter build web
+flutter build apk --debug
 ```
 
 Never put credentials or real player/minor data in this repository. Use synthetic local data only.
 
 ## Roadmap
 
-The next milestone implements authentication, user roles, recruiter verification states, and guardian-to-player relationships. Profiles, media, discovery, and meetings build on that identity and authorization layer.
+The next milestone begins only after the external production-readiness gates are
+complete. Player profiles, discovery, highlights, and meetings build on this
+identity and authorization layer.
 
 ## Contributing and licensing
 

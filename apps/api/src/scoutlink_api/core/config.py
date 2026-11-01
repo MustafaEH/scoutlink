@@ -1,7 +1,7 @@
 from functools import lru_cache
-from typing import Literal
+from typing import Literal, Self
 
-from pydantic import AnyHttpUrl, Field
+from pydantic import AnyHttpUrl, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,6 +25,25 @@ class Settings(BaseSettings):
     mux_token_id: str | None = None
     mux_token_secret: str | None = None
     mux_webhook_secret: str | None = None
+
+    @model_validator(mode="after")
+    def validate_production_configuration(self) -> Self:
+        if self.environment != "production":
+            return self
+        missing = [
+            name
+            for name, value in {
+                "SCOUTLINK_SUPABASE_URL": self.supabase_url,
+                "SCOUTLINK_SUPABASE_JWT_ISSUER": self.supabase_jwt_issuer,
+                "SCOUTLINK_SUPABASE_JWKS_URL": self.supabase_jwks_url,
+            }.items()
+            if not value
+        ]
+        if "scoutlink:scoutlink@localhost" in self.database_url:
+            missing.append("SCOUTLINK_DATABASE_URL")
+        if missing:
+            raise ValueError(f"Production configuration is missing: {', '.join(missing)}")
+        return self
 
     @property
     def docs_enabled(self) -> bool:

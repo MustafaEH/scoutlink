@@ -6,12 +6,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from scoutlink_api.core.auth import Principal, require_principal
 from scoutlink_api.db.session import get_session
 from scoutlink_api.modules.identity.schemas import (
+    CompleteOnboardingRequest,
     GuardianPlayerCreate,
     GuardianPlayerResponse,
     IdentityResponse,
     SelectRoleRequest,
 )
 from scoutlink_api.modules.identity.service import (
+    complete_onboarding,
     create_guardian_player,
     get_or_create_user,
     identity_response,
@@ -41,6 +43,16 @@ async def choose_role(
 ) -> IdentityResponse:
     user = await get_or_create_user(session, principal)
     return await select_role(session, user, request.role)
+
+
+@router.post("/onboarding", response_model=IdentityResponse)
+async def finish_onboarding(
+    request: CompleteOnboardingRequest,
+    principal: PrincipalDependency,
+    session: SessionDependency,
+) -> IdentityResponse:
+    user = await get_or_create_user(session, principal)
+    return await complete_onboarding(session, user, request)
 
 
 @router.post(

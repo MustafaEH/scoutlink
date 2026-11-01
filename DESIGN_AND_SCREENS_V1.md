@@ -94,8 +94,8 @@ Why:
 
 Scale:
 
-- Display: 40/48 desktop, 32/38 mobile.
-- H1: 32/40 desktop, 26/34 mobile.
+- Display: 32/38 mobile.
+- H1: 26/34 mobile.
 - H2: 24/32.
 - H3: 20/28.
 - Body: 16/24.
@@ -107,11 +107,11 @@ Do not use uppercase styling for Arabic. Latin labels may use restrained upperca
 ## 5. Layout and geometry
 
 - Base spacing unit: 4px; main rhythm in 8px increments.
-- Page maximum width: 1440px for scout/admin; 720px for focused player forms.
+- Content respects phone safe areas and readable line lengths; tablet layouts may use a centred 720px content column.
 - Border radius: 6–10px; avoid excessive 20–32px cards.
 - Borders: 1px, used more often than shadows.
 - Shadows: minimal and shallow, reserved for overlays/floating navigation.
-- Grid: 12-column desktop, 8-column tablet, 4-column mobile.
+- Grid: 4-column phone, 8-column tablet.
 - Mobile safe-area support.
 - Sticky primary action only when it prevents long-scroll loss.
 
@@ -155,8 +155,8 @@ Football/pitch-line motifs appear in marketing and empty states, not behind dens
 - Progress.
 - Skeleton.
 - Empty state.
-- Data table.
-- Pagination/cursor loader.
+- Structured list/card.
+- Cursor loader.
 - File/video uploader.
 - Video player.
 
@@ -188,7 +188,7 @@ Football/pitch-line motifs appear in marketing and empty states, not behind dens
 - Preserve user input on errors.
 - Make status and next action visible on every workflow screen.
 - Mobile bottom sheets for short actions; full pages for complex forms.
-- Desktop side panels may show quick player/verification detail without losing queue position.
+- Preserve list position when opening and returning from player or verification detail.
 - Undo reversible feed actions where possible.
 
 ## 10. RTL and localisation
@@ -213,15 +213,15 @@ Football/pitch-line motifs appear in marketing and empty states, not behind dens
 
 ### Recruiter
 
-- Mobile: full-screen video feed and quick shortlist actions.
-- Desktop: sidebar, wider feed/player detail, filters, shortlist workspace.
-- Same capabilities across both; desktop optimises density.
+- Full-screen video feed and quick shortlist actions.
+- Filter sheets, saved searches, and focused full-page player detail.
+- Dense tools remain touch-friendly and readable on phones.
 
 ### Admin
 
-- Desktop first.
-- Mobile provides urgent review/status only; full sensitive-document review should occur on approved larger devices where possible.
-- Queue tables collapse into cards on tablet.
+- Mobile app with assigned roles and explicit re-authentication for sensitive actions.
+- Review queues use cards and full-page detail rather than compressed tables.
+- Sensitive documents use protected, time-limited views and cannot appear in notifications.
 
 ## 12. Screen inventory
 
@@ -367,8 +367,6 @@ Mobile priority: urgent action visible without scrolling.
 
 ### R06 — Discovery feed
 
-Mobile:
-
 - video occupies most viewport;
 - bottom gradient only for legibility, not decorative glow;
 - player facts and evidence label over lower section;
@@ -376,19 +374,11 @@ Mobile:
 - tabs above feed;
 - sound control and progress.
 
-Desktop:
-
-- left navigation;
-- central video card;
-- right compact context panel with facts, brief match reasons, and quick notes;
-- keyboard shortcuts optional after core usability.
-
 Feed shows why recommended: “Matches U17 left-footed CB brief,” “New verified evidence,” etc.
 
 ### R07 — Search
 
-- Desktop filter sidebar; mobile filter sheet.
-- Active filters visible and removable.
+- Filter sheet with active filters visible and removable above results.
 - Result count/candidate availability without exposing restricted records.
 - Compact player cards with thumbnail, facts, badges, freshness, and quick shortlist.
 - Clear zero-result recovery.
@@ -427,7 +417,7 @@ No guardian contact, home/school location, public comments, or social follower c
 
 ### R13 — Recruitment brief
 
-- One-page desktop form, stepped mobile form.
+- Stepped mobile form with saved progress.
 - Required football criteria separated from preferences.
 - Candidate-estimate preview.
 - Warning against discriminatory or unsafe criteria.
@@ -550,7 +540,7 @@ To build efficiently:
 5. Create high-fidelity designs only for unique/complex screens.
 6. Build the reusable components in code.
 7. Assemble simple screens directly from the system.
-8. Review mobile, desktop, Arabic, English, empty, error, and permission states.
+8. Review Android, iOS, phone/tablet, Arabic, English, empty, error, and permission states.
 
 Do not fully mock every CRUD screen before implementation. Fully design the system and the high-risk experiences; assemble routine screens from approved patterns.
 

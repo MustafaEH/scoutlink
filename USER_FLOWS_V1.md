@@ -15,9 +15,9 @@ Bottom navigation:
 4. Opportunities
 5. Account
 
-### Recruiter navigation
+### Recruiter mobile navigation
 
-Mobile bottom navigation / desktop sidebar:
+Bottom navigation, with secondary tools under More:
 
 1. Discover
 2. Search
@@ -26,9 +26,9 @@ Mobile bottom navigation / desktop sidebar:
 5. Meetings
 6. Account/Organisation
 
-### Admin desktop navigation
+### Assigned staff mobile navigation
 
-Sidebar:
+Staff roles are assigned by the platform, never chosen during public onboarding. Bottom navigation uses Overview, Reviews, Meetings, Reports, and More; More contains:
 
 1. Overview
 2. Player verification
