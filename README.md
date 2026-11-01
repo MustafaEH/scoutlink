@@ -52,6 +52,8 @@ the only gateway to business data and authorization.
 - `infra` — local containers and deployment foundations.
 
 The authoritative documents are listed in [`SPEC_INDEX.md`](./SPEC_INDEX.md).
+Active feature work is tracked in [`docs/tickets`](./docs/tickets/README.md),
+with an independent QA report required before a ticket is marked done.
 
 Key documents:
 
